@@ -46,7 +46,7 @@ class LazyRouteList extends RouteList
     }
 
     /**
-     * @param array                $params
+     * @param array     $params
      * @param UrlScript $refUrl
      * @return string|null
      */
@@ -75,16 +75,21 @@ class LazyRouteList extends RouteList
     /**
      * @param string   $path
      * @param callable $loadFactory
+     * @param bool     $prefixPath Should inner routes be prefixed with lazy load path?
      * @return self
      */
-    public function lazyLoadPath(string $path, callable $loadFactory) : self
+    public function lazyLoadPath(string $path, callable $loadFactory, bool $prefixPath = true) : self
     {
-        $router = new static;
+        if ($prefixPath) {
+            $router = $this->withPath($path);
+        } else {
+            $router = new static;
+            $router->parent = $this;
+            $this->add($router);
+        }
         $router->lazyPath = rtrim($path, '/') . '/';
-        $router->parent = $this;
-        $router->lazyLoadFactory = $loadFactory;
         $router->isLoaded = false;
-        $this->add($router);
+        $router->lazyLoadFactory = $loadFactory;
         return $router;
     }
 }
