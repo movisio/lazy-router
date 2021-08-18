@@ -1,0 +1,20 @@
+{
+    "name": "movisio/lazy-router",
+    "description": "Nette RouteList with capability of lazy loading routes with prefix",
+    "authors": [
+        {
+            "name": "Movisio s.r.o."
+        }
+    ],
+    "type": "library",
+    "require": {
+        "php": "^7.4|^8.0",
+        "nette/application": "^3"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Movisio\\Routing\\": "src/Routing"
+        }
+    }
+}
