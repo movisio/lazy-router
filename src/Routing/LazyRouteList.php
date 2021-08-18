@@ -54,9 +54,11 @@ class LazyRouteList extends RouteList
     {
         if (isset($params[self::LAZY_LOAD_KEY])) {
             $path = rtrim($params[self::LAZY_LOAD_KEY], '/') . '/';
-            if ($path === $this->lazyPath && !$this->isLoaded) {
-                $this->load();
+            if ($path === $this->lazyPath) {
                 unset($params[self::LAZY_LOAD_KEY]);
+                if (!$this->isLoaded) {
+                    $this->load();
+                }
             }
         }
 
