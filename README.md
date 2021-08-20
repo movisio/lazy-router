@@ -4,61 +4,34 @@ It is usable especially when you have many (hundreds?) of routes, which slows yo
 
 For example, when your application have more independent modules and every module has its own routes, they can be separated and lazy loaded per-module.
 
+Note that this router was created especially for hundreds of static routes
+for large API and should not be used for normal route `<module>/<presenter>/<action>`.
+
 ## Usage
-By default, LazyRouteList behaves exactly like ordinary RouteList. For lazy loading function, use `lazyLoadPath` method:
+By default, LazyRouteList behaves exactly like ordinary RouteList.
+For lazy loading function, use `setLazyCachedRoutes` method.
+It has only one argument: callback for loading routes into cache.
+Return value of callback should be array of routers.
+Function also accepts argument $dependencies, just like nette Cache::load callback.
 
 ```php
-$router = new LazyRouteList();
-
-// this route will not be lazy loaded
-$router->addRoute("not/lazy/loaded", "Presenter:action");
-
-// routes will be lazy loaded if url begins with "lazy" and routes will be prefixed
-$router->lazyLoadPath("lazy", function(LazyRouteList $routeList) {
-    // route will match url "lazy/test"
-    $routeList->addRoute("test", "TestPresenter:default");
+$router = new LazyRouteList($cache);
+$router->setLazyCachedRoutes(function (&$dependencies) : array {
     
-    // route will match url "lazy/test2/<param>"
-    $routeList->addRoute("test2/<param>", "ParamPresenter:default");
+    // .... read routes from files or whatever ...
+    $routes = [
+        new \Nette\Routing\Route('/api/v1/route/to/resource', 'Module:ApiPresenter:action')    
+    ];
     
-    // route will match url "lazy/lazy/test"
-    $routeList->addRoute("lazy/test", "AnotherTestPresenter:default");
+    // optional cache dependency for automatic cache invalidation and routes reloading
+    $dependencies[\Nette\Caching\Cache::FILES] = ['path/to/file', 'path/to/another/file'];
+    
+    return $routes;
 });
-
-// with third parameter false, routes will not be prefixed
-$router->lazyLoadPath("lazy", function (LazyRouteList $routeList) {
-    // route will match url "lazy/test", not "lazy/lazy/test"
-    $routeList->addRoute("lazy/test", "TestPresenter:default");
-    
-    // route will match url "lazy/test2/<param>"
-    $routeList->addRoute("lazy/test2/<param>", "ParamPresenter:default");
-}, false);
-
 ```
 
-## Creating links
-By default, lazy loading of routes is not triggered for link creating. Router does not know if you want to create link for lazy loaded routes or other routes. When you do not want to create link for lazy loaded routes, you do not want router to load them and slow your system down.
+Routes will be separated into groups by static part of path (without parameters) and by presenters and will be cached.
 
-But if you want routes to be lazy loaded, you need to add parameter with key `LazyRouteList::LAZY_LOAD_KEY` and value equal to defined lazy loaded path. If path from parameter matches prefixed lazy router, routes will be loaded and parameter will be removed, so it does not appear in generated URL.
-
-Example with above defined routes:
-```php
-// call in presenter
-$this->link(
-    "ParamPresenter:default",
-    [
-        LazyRouteList::LAZY_LOAD_KEY => "lazy", // this parameter will trigger loading routes from path "lazy"
-        'param' => 123,
-        'otherParam' => 111
-    ]
-);
-// generated url will be "/lazy/test2/123?otherParam=111"
-```
-
-In latte template, call is similar and generated link will be the same as above.
-```
-{link ParamPresenter:default, Movisio\Routing\LazyRouteList::LAZY_LOAD_KEY => "lazy, "param" => 123, "otherParam" => 111}
-```
-
-When you are generating many links to lazy loaded section, you just need to add trigger parameter once, to the first call of `link()` or `{link}`. After routes are loaded, parameter `LAZY_LOAD_KEY` is not necessary.
+When matching, router will load only routes with matching static part of path.  
+When creating links, only routes matching target presenter will be loaded from cache.
 

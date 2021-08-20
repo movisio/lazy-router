@@ -9,7 +9,8 @@
     "type": "library",
     "require": {
         "php": "^7.4|^8.0",
-        "nette/application": "^3"
+        "nette/application": "^3",
+        "nette/caching": "^3"
     },
     "license": "MIT",
     "autoload": {
