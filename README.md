@@ -1,5 +1,5 @@
 # Nette lazy router
-Nette RouteList with capability of lazy loading routes with prefix.  
+Nette RouteList with capability of lazy loading routes.  
 It is usable especially when you have many (hundreds?) of routes, which slows your system and you don't need to load them all for every request.
 
 For example, when your application have more independent modules and every module has its own routes, they can be separated and lazy loaded per-module.
