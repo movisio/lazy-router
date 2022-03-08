@@ -103,7 +103,7 @@ class LazyRouteList extends RouteList
             if (is_null($loadedRouters)) {
                 $loadedRouters = $this->cache->load("lazy_routes_by_path:" . $path);
                 foreach ($loadedRouters as $router) {
-                    $this->add($router);
+                    $this->add($router, $router->getFlags());
                 }
             }
         }
@@ -128,7 +128,7 @@ class LazyRouteList extends RouteList
             $routers = $this->cache->load("lazy_routes_by_presenter:" . $presenter);
             $this->routersByPresenter[$presenter] = [];
             foreach ($routers as $router) {
-                $this->add($router);
+                $this->add($router, $router->getFlags());
                 $this->routersByPresenter[$presenter][] = $router;
             }
         }
