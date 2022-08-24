@@ -12,6 +12,9 @@
         "nette/application": "^3",
         "nette/caching": "^3"
     },
+    "conflict": {
+        "movisio/nais-core": "<2.0"
+    },
     "license": "MIT",
     "autoload": {
         "psr-4": {
